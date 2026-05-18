@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wayfare — Travel Curators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sand: #f5f0e8;
+      --ink: #1a1714;
+      --stone: #8c8580;
+      --accent: #c8a96e;
+      --white: #fdfcfa;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.6;
+      font-weight: 300;
+      cursor: default;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 28px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(253,252,250,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.4s;
+    }
+    nav.scrolled { border-color: rgba(26,23,20,0.08); }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--stone);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+
+    /* PAGE SYSTEM */
+    .page {
+      display: none;
+      min-height: 100vh;
+      padding-top: 88px;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+    }
+    .page.active {
+      display: block;
+    }
+    .page.visible { opacity: 1; }
+
+    /* ── HOME ── */
+    #home {
+      display: none;
+      flex-direction: column;
+    }
+    #home.active { display: flex; }
+
+    .hero {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 88px);
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 64px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(52px, 5vw, 76px);
+      font-weight: 300;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--stone);
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--stone);
+      max-width: 340px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 4px;
+      cursor: pointer;
+      background: none;
+      border-left: none; border-right: none; border-top: none;
+      transition: color 0.25s, gap 0.25s;
+    }
+    .btn:hover { gap: 20px; color: var(--accent); }
+    .btn-arrow { font-size: 16px; }
+
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-right img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.88) saturate(0.85);
+      transition: transform 8s ease;
+    }
+    .hero-right:hover img { transform: scale(1.03); }
+
+    .hero-tag {
+      position: absolute;
+      bottom: 40px; left: 40px;
+      background: rgba(253,252,250,0.88);
+      backdrop-filter: blur(6px);
+      padding: 18px 24px;
+      border-left: 2px solid var(--accent);
+    }
+    .hero-tag p { font-size: 12px; color: var(--stone); letter-spacing: 0.08em; }
+    .hero-tag strong { display: block; font-size: 18px; font-family: 'Cormorant Garamond', serif; font-weight: 400; color: var(--ink); }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid rgba(26,23,20,0.08);
+      background: var(--sand);
+    }
+    .stat {
+      padding: 36px 64px;
+      border-right: 1px solid rgba(26,23,20,0.08);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--stone);
+      margin-top: 6px;
+    }
+
+    /* ── DESTINATIONS ── */
+    #destinations { background: var(--white); }
+
+    .page-header {
+      padding: 80px 64px 48px;
+      border-bottom: 1px solid rgba(26,23,20,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .page-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 52px;
+      font-weight: 300;
+      line-height: 1.1;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: var(--stone);
+      max-width: 280px;
+      text-align: right;
+      line-height: 1.7;
+    }
+
+    .dest-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dest-card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      cursor: pointer;
+    }
+    .dest-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.75) saturate(0.8);
+      transition: transform 0.7s ease, filter 0.4s;
+    }
+    .dest-card:hover img { transform: scale(1.05); filter: brightness(0.65) saturate(0.9); }
+
+    .dest-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 36px 32px;
+      background: linear-gradient(to top, rgba(20,18,15,0.85) 0%, transparent 100%);
+      color: var(--white);
+    }
+    .dest-region {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .dest-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 300;
+      line-height: 1.1;
+    }
+    .dest-nights {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 6px;
+    }
+
+    /* ── ABOUT ── */
+    #about { background: var(--sand); }
+
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 88px);
+    }
+    .about-img {
+      position: relative;
+      overflow: hidden;
+    }
+    .about-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85) saturate(0.75);
+    }
+    .about-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 72px;
+    }
+    .about-content h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px;
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 32px;
+    }
+    .about-content p {
+      font-size: 15px;
+      color: var(--stone);
+      line-height: 1.8;
+      margin-bottom: 20px;
+      max-width: 440px;
+    }
+    .values {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .value {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .value-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      min-width: 24px;
+      padding-top: 2px;
+    }
+    .value-text strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .value-text span { font-size: 13px; color: var(--stone); }
+
+    /* ── JOURNAL ── */
+    #journal { background: var(--white); }
+
+    .journal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: rgba(26,23,20,0.08);
+      border-top: 1px solid rgba(26,23,20,0.08);
+    }
+    .journal-card {
+      background: var(--white);
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      overflow: hidden;
+      transition: background 0.25s;
+      cursor: pointer;
+    }
+    .journal-card:hover { background: var(--sand); }
+    .journal-card img {
+      width: 260px;
+      height: 220px;
+      object-fit: cover;
+      filter: saturate(0.7) brightness(0.9);
+      transition: filter 0.35s;
+    }
+    .journal-card:hover img { filter: saturate(0.85) brightness(0.88); }
+    .journal-meta {
+      padding: 36px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .journal-tag {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .journal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1.3;
+      margin: 12px 0;
+      color: var(--ink);
+    }
+    .journal-excerpt {
+      font-size: 13px;
+      color: var(--stone);
+      line-height: 1.65;
+    }
+    .journal-date {
+      font-size: 11px;
+      color: rgba(140,133,128,0.6);
+      letter-spacing: 0.1em;
+      margin-top: 20px;
+    }
+
+    /* ── CONTACT ── */
+    #contact {
+      background: var(--ink);
+      color: var(--white);
+    }
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 88px);
+    }
+    .contact-left {
+      padding: 80px 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .contact-left h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 52px;
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .contact-left h2 em { color: var(--accent); font-style: italic; }
+    .contact-left p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.8;
+      max-width: 340px;
+      margin-bottom: 56px;
+    }
+    .contact-details { display: flex; flex-direction: column; gap: 28px; }
+    .contact-item label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .contact-item a, .contact-item span {
+      font-size: 15px;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .contact-item a:hover { color: var(--white); }
+
+    .contact-right {
+      padding: 80px 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .form-group {
+      margin-bottom: 32px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 10px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      padding: 14px 18px;
+      outline: none;
+      transition: border-color 0.25s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+    .form-group select option { background: var(--ink); }
+    .form-group textarea { resize: none; height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .btn-submit {
+      background: var(--accent);
+      color: var(--ink);
+      border: none;
+      padding: 16px 40px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.25s;
+      width: 100%;
+    }
+    .btn-submit:hover { opacity: 0.85; }
+
+    /* FOOTER */
+    footer {
+      background: var(--ink);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 24px 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer p { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.08em; }
+
+    /* TRANSITIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page.visible .hero-left > * {
+      animation: fadeUp 0.55s ease both;
+    }
+    .page.visible .hero-left > *:nth-child(1) { animation-delay: 0.05s; }
+    .page.visible .hero-left > *:nth-child(2) { animation-delay: 0.12s; }
+    .page.visible .hero-left > *:nth-child(3) { animation-delay: 0.19s; }
+    .page.visible .hero-left > *:nth-child(4) { animation-delay: 0.26s; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 20px 28px; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { height: 50vw; }
+      .hero-left { padding: 48px 28px; }
+      .stats-bar { grid-template-columns: 1fr; }
+      .stat { padding: 24px 28px; border-right: none; border-bottom: 1px solid rgba(26,23,20,0.08); }
+      .dest-grid { grid-template-columns: 1fr; }
+      .about-inner { grid-template-columns: 1fr; }
+      .about-img { height: 50vw; }
+      .about-content { padding: 48px 28px; }
+      .journal-grid { grid-template-columns: 1fr; }
+      .journal-card { grid-template-columns: 1fr; }
+      .journal-card img { width: 100%; height: 200px; }
+      .contact-inner { grid-template-columns: 1fr; }
+      .contact-left, .contact-right { padding: 48px 28px; }
+      .page-header { flex-direction: column; gap: 16px; padding: 48px 28px 32px; }
+      .page-header p { text-align: left; }
+      footer { flex-direction: column; gap: 10px; text-align: center; padding: 20px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="#" class="logo" onclick="showPage('home')">Way<span>fare</span></a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home')" data-page="home" class="active">Home</a></li>
+    <li><a href="#" onclick="showPage('destinations')" data-page="destinations">Destinations</a></li>
+    <li><a href="#" onclick="showPage('about')" data-page="about">About</a></li>
+    <li><a href="#" onclick="showPage('journal')" data-page="journal">Journal</a></li>
+    <li><a href="#" onclick="showPage('contact')" data-page="contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HOME -->
+<section class="page active" id="home">
+  <div class="hero">
+    <div class="hero-left">
+      <p class="eyebrow">Curated Travel Experiences</p>
+      <h1>Travel that<br/><em>moves</em> you<br/>deeply.</h1>
+      <p class="hero-sub">We craft unhurried journeys for the discerning traveller — slow, intentional, and beautifully off the beaten path.</p>
+      <button class="btn" onclick="showPage('destinations')">Explore destinations <span class="btn-arrow">→</span></button>
+    </div>
+    <div class="hero-right">
+      <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&q=80" alt="Travel"/>
+      <div class="hero-tag">
+        <p>Featured Journey</p>
+        <strong>Ladakh, India</strong>
+      </div>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num">48+</div>
+      <div class="stat-label">Destinations</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2,400</div>
+      <div class="stat-label">Journeys crafted</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">12</div>
+      <div class="stat-label">Years of curation</div>
+    </div>
+  </div>
+</section>
+
+<!-- DESTINATIONS -->
+<section class="page" id="destinations">
+  <div class="page-header">
+    <h2>Our<br/><em style="font-style:italic;font-family:'Cormorant Garamond',serif;">Destinations</em></h2>
+    <p>Handpicked places where culture, landscape, and silence meet in perfect proportion.</p>
+  </div>
+  <div class="dest-grid">
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=700&q=75" alt="Kyoto"/>
+      <div class="dest-info">
+        <div class="dest-region">East Asia</div>
+        <div class="dest-name">Kyoto,<br/>Japan</div>
+        <div class="dest-nights">from 7 nights</div>
+      </div>
+    </div>
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1539768942893-daf53e448371?w=700&q=75" alt="Santorini"/>
+      <div class="dest-info">
+        <div class="dest-region">Mediterranean</div>
+        <div class="dest-name">Santorini,<br/>Greece</div>
+        <div class="dest-nights">from 5 nights</div>
+      </div>
+    </div>
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=700&q=75" alt="Patagonia"/>
+      <div class="dest-info">
+        <div class="dest-region">South America</div>
+        <div class="dest-name">Patagonia,<br/>Chile</div>
+        <div class="dest-nights">from 10 nights</div>
+      </div>
+    </div>
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=700&q=75" alt="Morocco"/>
+      <div class="dest-info">
+        <div class="dest-region">North Africa</div>
+        <div class="dest-name">Marrakech,<br/>Morocco</div>
+        <div class="dest-nights">from 6 nights</div>
+      </div>
+    </div>
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=700&q=75" alt="India"/>
+      <div class="dest-info">
+        <div class="dest-region">South Asia</div>
+        <div class="dest-name">Rajasthan,<br/>India</div>
+        <div class="dest-nights">from 8 nights</div>
+      </div>
+    </div>
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=700&q=75" alt="Iceland"/>
+      <div class="dest-info">
+        <div class="dest-region">Nordic</div>
+        <div class="dest-name">Ring Road,<br/>Iceland</div>
+        <div class="dest-nights">from 9 nights</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="page" id="about">
+  <div class="about-inner">
+    <div class="about-img">
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80" alt="About"/>
+    </div>
+    <div class="about-content">
+      <p class="eyebrow">Our Story</p>
+      <h2>We believe the world<br/>deserves to be <em style="font-style:italic;font-family:'Cormorant Garamond',serif;">savoured.</em></h2>
+      <p>Wayfare was founded in 2012 by two travellers who grew tired of crowded itineraries and transactional tourism. We design journeys the way you'd design a meal — with intention, pacing, and a deep respect for place.</p>
+      <p>Every trip we craft is bespoke. No two are identical. We work with a small circle of local experts, family-run lodges, and independent guides who share our conviction that slower is almost always better.</p>
+      <div class="values">
+        <div class="value">
+          <span class="value-num">01</span>
+          <div class="value-text">
+            <strong>Slow Travel</strong>
+            <span>Fewer destinations, deeper immersion. We never rush what should be lingered over.</span>
+          </div>
+        </div>
+        <div class="value">
+          <span class="value-num">02</span>
+          <div class="value-text">
+            <strong>Local First</strong>
+            <span>Every guide, lodge, and restaurant is independently run and community-rooted.</span>
+          </div>
+        </div>
+        <div class="value">
+          <span class="value-num">03</span>
+          <div class="value-text">
+            <strong>Radical Curation</strong>
+            <span>We visit every place we recommend. No exceptions, no shortcuts.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNAL -->
+<section class="page" id="journal">
+  <div class="page-header">
+    <h2>The<br/><em style="font-style:italic;font-family:'Cormorant Garamond',serif;">Journal</em></h2>
+    <p>Notes, observations, and quiet discoveries from the places we wander.</p>
+  </div>
+  <div class="journal-grid">
+    <div class="journal-card">
+      <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&q=70" alt="Kyoto"/>
+      <div class="journal-meta">
+        <div>
+          <div class="journal-tag">Japan</div>
+          <div class="journal-title">On the art of doing nothing in Kyoto</div>
+          <div class="journal-excerpt">The city teaches you patience. You notice the quality of light through a shoji screen, the way a garden rearranges itself with the seasons.</div>
+        </div>
+        <div class="journal-date">March 2025</div>
+      </div>
+    </div>
+    <div class="journal-card">
+      <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&q=70" alt="Patagonia"/>
+      <div class="journal-meta">
+        <div>
+          <div class="journal-tag">Chile</div>
+          <div class="journal-title">Twelve days at the edge of the world</div>
+          <div class="journal-excerpt">Patagonia has a way of making your everyday life feel suddenly very small — and somehow that is a relief.</div>
+        </div>
+        <div class="journal-date">January 2025</div>
+      </div>
+    </div>
+    <div class="journal-card">
+      <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=400&q=70" alt="Morocco"/>
+      <div class="journal-meta">
+        <div>
+          <div class="journal-tag">Morocco</div>
+          <div class="journal-title">Getting pleasantly lost in Fes</div>
+          <div class="journal-excerpt">The medina has no correct route. Every wrong turn leads somewhere worth finding. A leather tannery, a brass-worker, a mint tea pressed into your hands.</div>
+        </div>
+        <div class="journal-date">November 2024</div>
+      </div>
+    </div>
+    <div class="journal-card">
+      <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=70" alt="Ladakh"/>
+      <div class="journal-meta">
+        <div>
+          <div class="journal-tag">India</div>
+          <div class="journal-title">The silence of Ladakh at 4,000 metres</div>
+          <div class="journal-excerpt">There is a quality of quiet here that you don't find anywhere else. The mountains hold it. The monasteries amplify it.</div>
+        </div>
+        <div class="journal-date">September 2024</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="page" id="contact">
+  <div class="contact-inner">
+    <div class="contact-left">
+      <p class="eyebrow" style="color:var(--accent)">Plan Your Journey</p>
+      <h2>Let's design<br/>something <em>worth<br/>remembering.</em></h2>
+      <p>Tell us where you dream of going. We'll take care of everything else — quietly, thoughtfully, exceptionally well.</p>
+      <div class="contact-details">
+        <div class="contact-item">
+          <label>Email</label>
+          <a href="mailto:hello@wayfare.travel">hello@wayfare.travel</a>
+        </div>
+        <div class="contact-item">
+          <label>Phone</label>
+          <span>+91 98100 00000</span>
+        </div>
+        <div class="contact-item">
+          <label>Office</label>
+          <span>Shimla, Himachal Pradesh</span>
+        </div>
+      </div>
+    </div>
+    <div class="contact-right">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" placeholder="Arjun"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" placeholder="Sharma"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>Destination in mind</label>
+        <select>
+          <option value="">Select a region</option>
+          <option>East Asia</option>
+          <option>South Asia</option>
+          <option>Mediterranean</option>
+          <option>North Africa</option>
+          <option>South America</option>
+          <option>Nordic</option>
+          <option>Somewhere surprising</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tell us about your dream trip</label>
+        <textarea placeholder="Where, when, with whom, and what you're hoping to feel..."></textarea>
+      </div>
+      <button class="btn-submit">Send enquiry</button>
+    </div>
+  </div>
+  <footer>
+    <p>© 2025 Wayfare Travel Curators. All rights reserved.</p>
+    <p>Crafted with intention.</p>
+  </footer>
+</section>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.remove('active', 'visible');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.toggle('active', a.dataset.page === id);
+    });
+
+    const target = document.getElementById(id);
+    target.classList.add('active');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => target.classList.add('visible'));
+    });
+
+    window.scrollTo({ top: 0 });
+    return false;
+  }
+
+  // Nav scroll shadow
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
+  });
+
+  // Initial fade-in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('home').classList.add('visible');
+    });
+  });
+
+  // Prevent default on nav links
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', e => e.preventDefault());
+  });
+</script>
+</body>
+</html>
